@@ -1,0 +1,165 @@
+/**
+ * Shared shapes for NestOS data.
+ * Every page (Dashboard, Rooms, Residents…) uses these, so they stay in one place.
+ */
+
+export type Property = {
+  id: string;
+  name: string;
+  area: string;
+  city: string;
+};
+
+export type Manager = {
+  firstName: string;
+  fullName: string;
+  role: string;
+  initials: string;
+};
+
+/* ---------- Rooms & beds ---------- */
+
+export type BedStatus = "occupied" | "available" | "vacating";
+
+export type Bed = {
+  id: string; // e.g. "207-B"
+  label: string; // "A", "B", "C"
+  status: BedStatus;
+  residentName?: string;
+};
+
+export type Room = {
+  number: string; // "207"
+  floor: number;
+  sharing: 2 | 3;
+  beds: Bed[];
+};
+
+export type OccupancySummary = {
+  totalBeds: number;
+  occupied: number;
+  available: number;
+  vacating: number;
+  occupancyRate: number; // 0–100
+};
+
+/* ---------- Money ---------- */
+
+export type FinanceRange = "12m" | "30d" | "7d";
+
+export type FinancePoint = {
+  label: string; // x-axis label
+  fullLabel: string; // tooltip label
+  revenue: number; // ₹
+  expenses: number; // ₹
+};
+
+export type FinanceSeries = {
+  range: FinanceRange;
+  points: FinancePoint[];
+  totalRevenue: number;
+  totalExpenses: number;
+};
+
+export type FinanceSummary = {
+  monthLabel: string;
+  revenue: number;
+  revenueChange: number; // % vs last month
+  expenses: number;
+  netProfit: number;
+  netProfitChange: number;
+  expectedRent: number;
+  collectedRent: number;
+  dueRent: number;
+  overdueRent: number;
+  collectionRate: number; // 0–100
+  collectionChange: number; // % points vs last month
+  series: Record<FinanceRange, FinanceSeries>;
+};
+
+/* ---------- Residents & payments ---------- */
+
+export type PaymentStatus = "paid" | "due" | "overdue";
+
+export type PaymentRecord = {
+  id: string;
+  residentName: string;
+  initials: string;
+  room: string; // "204-A"
+  amount: number;
+  status: PaymentStatus;
+  /** paid: when paid · due: days until due · overdue: days late */
+  note: string;
+  method?: "UPI" | "Cash" | "Bank transfer";
+};
+
+export type ResidentSummary = {
+  total: number;
+  paid: number;
+  due: number;
+  overdue: number;
+};
+
+/* ---------- Complaints ---------- */
+
+export type ComplaintPriority = "urgent" | "medium" | "low";
+export type ComplaintStatus = "open" | "in_progress";
+
+export type Complaint = {
+  id: string;
+  room: string;
+  title: string;
+  category: "Electrical" | "Plumbing" | "Internet" | "Furniture" | "Cleaning";
+  priority: ComplaintPriority;
+  status: ComplaintStatus;
+  hoursOpen: number;
+  residentName: string;
+  initials: string;
+  assignedTo?: string;
+};
+
+/* ---------- Needs attention ---------- */
+
+export type AttentionTone = "danger" | "warning" | "info";
+
+export type AttentionItem = {
+  id: "overdue-rent" | "urgent-complaints" | "check-ins" | "vacating";
+  count: number;
+  title: string; // "Overdue rent payments"
+  detail: string; // "₹28,000 pending · oldest 12 days"
+  tone: AttentionTone;
+  actionLabel: string;
+};
+
+export type CheckIn = {
+  residentName: string;
+  initials: string;
+  bed: string;
+  time: string;
+};
+
+/* ---------- Notifications ---------- */
+
+export type Notification = {
+  id: string;
+  title: string;
+  time: string;
+  tone: AttentionTone | "success";
+  unread: boolean;
+};
+
+/* ---------- Everything the dashboard needs ---------- */
+
+export type DashboardData = {
+  property: Property;
+  manager: Manager;
+  attention: AttentionItem[];
+  finance: FinanceSummary;
+  occupancy: OccupancySummary;
+  rooms: Room[];
+  complaints: Complaint[];
+  complaintsResolvedRate: number; // 0–100, this month
+  residents: ResidentSummary;
+  payments: PaymentRecord[];
+  checkIns: CheckIn[];
+};
