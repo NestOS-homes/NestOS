@@ -19,7 +19,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
       <div className="relative lg:pl-[248px]">
         <TopBar properties={properties} manager={manager} notifications={notifications} />
-        <main className="mx-auto max-w-[1440px] px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pb-12">{children}</main>
+        <main className="px-4 pt-6 pb-28 sm:px-6 lg:px-8 lg:pb-12">{children}</main>
       </div>
 
       <MobileNav />

@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Area, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
+import { ChartArea as AreaIcon, ChartColumn, ChartLine, Check, ChevronDown, type LucideIcon } from "lucide-react";
+import { Area, Bar, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { formatINR, formatINRCompact } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -14,6 +22,14 @@ const RANGES: { id: FinanceRange; label: string }[] = [
   { id: "7d", label: "1 week" },
 ];
 
+type ChartType = "bar" | "line" | "area";
+
+const CHART_TYPES: { id: ChartType; label: string; icon: LucideIcon }[] = [
+  { id: "bar", label: "Bar chart", icon: ChartColumn },
+  { id: "line", label: "Line chart", icon: ChartLine },
+  { id: "area", label: "Area chart", icon: AreaIcon },
+];
+
 const chartConfig = {
   revenue: { label: "Revenue", color: "var(--chart-1)" },
   expenses: { label: "Expenses", color: "var(--chart-2)" },
@@ -21,16 +37,22 @@ const chartConfig = {
 
 /** Revenue vs expenses over time, with totals and profit for the chosen period. */
 export function FinanceOverview({ finance }: { finance: FinanceSummary }) {
-  const [range, setRange] = useState<FinanceRange>("30d");
+  const [range, setRange] = useState<FinanceRange>("12m");
+  const [chartType, setChartType] = useState<ChartType>("bar");
   const series = finance.series[range];
   const profit = series.totalRevenue - series.totalExpenses;
-  const tickInterval = range === "30d" ? 5 : range === "12m" ? 1 : 0;
+  const tickInterval = range === "30d" ? 5 : 0;
 
   return (
     <SectionCard
       title="Revenue performance"
       description="Money in vs money out"
-      action={<RangePicker value={range} onChange={setRange} />}
+      action={
+        <>
+          <RangePicker value={range} onChange={setRange} />
+          <ChartTypePicker value={chartType} onChange={setChartType} />
+        </>
+      }
       bodyClassName="flex flex-col"
     >
       {/* Legend with totals, so colour is never the only clue */}
@@ -40,12 +62,16 @@ export function FinanceOverview({ finance }: { finance: FinanceSummary }) {
         <LegendStat label="Profit" value={formatINRCompact(profit)} valueClassName="text-success" />
       </dl>
 
-      <ChartContainer config={chartConfig} className="mt-auto aspect-auto h-[240px] w-full">
-        <ComposedChart data={series.points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+      <ChartContainer config={chartConfig} className="aspect-auto min-h-[260px] w-full flex-1">
+        <ComposedChart data={series.points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="12%">
           <defs>
             <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="var(--color-revenue)" stopOpacity={0.28} />
               <stop offset="100%" stopColor="var(--color-revenue)" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="expensesFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--color-expenses)" stopOpacity={0.22} />
+              <stop offset="100%" stopColor="var(--color-expenses)" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 4" />
@@ -65,26 +91,69 @@ export function FinanceOverview({ finance }: { finance: FinanceSummary }) {
             tick={{ fontSize: 11 }}
             tickFormatter={(v: number) => formatINRCompact(v)}
           />
-          <ChartTooltip cursor={{ stroke: "rgba(255,255,255,0.18)", strokeDasharray: "4 4" }} content={<FinanceTooltip />} />
-          <Area
-            type="monotone"
-            dataKey="revenue"
-            stroke="var(--color-revenue)"
-            strokeWidth={2.5}
-            fill="url(#revenueFill)"
-            activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
+          <ChartTooltip
+            cursor={
+              chartType === "bar"
+                ? { fill: "rgba(255,255,255,0.05)" }
+                : { stroke: "rgba(255,255,255,0.18)", strokeDasharray: "4 4" }
+            }
+            content={<FinanceTooltip />}
           />
-          <Line
-            type="monotone"
-            dataKey="expenses"
-            stroke="var(--color-expenses)"
-            strokeWidth={2.5}
-            dot={false}
-            activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
-          />
+
+          {chartType === "bar" ? (
+            <>
+              <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+              <Bar dataKey="expenses" fill="var(--color-expenses)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+            </>
+          ) : null}
+
+          {chartType === "line" ? (
+            <>
+              <Line type="monotone" dataKey="revenue" stroke="var(--color-revenue)" strokeWidth={2.5} dot={false} activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }} />
+              <Line type="monotone" dataKey="expenses" stroke="var(--color-expenses)" strokeWidth={2.5} dot={false} activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }} />
+            </>
+          ) : null}
+
+          {chartType === "area" ? (
+            <>
+              <Area type="monotone" dataKey="revenue" stroke="var(--color-revenue)" strokeWidth={2.5} fill="url(#revenueFill)" activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }} />
+              <Area type="monotone" dataKey="expenses" stroke="var(--color-expenses)" strokeWidth={2.5} fill="url(#expensesFill)" activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }} />
+            </>
+          ) : null}
         </ComposedChart>
       </ChartContainer>
     </SectionCard>
+  );
+}
+
+function ChartTypePicker({ value, onChange }: { value: ChartType; onChange: (t: ChartType) => void }) {
+  const current = CHART_TYPES.find((t) => t.id === value) ?? CHART_TYPES[0];
+  const Icon = current.icon;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label="Chart type"
+        className="flex h-8 items-center gap-1.5 rounded-full border border-border bg-[#16161b] px-3 text-xs text-foreground transition-colors outline-none hover:bg-[#1c1c22] focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Icon className="size-3.5 text-muted-foreground" />
+        {current.label.replace(" chart", "")}
+        <ChevronDown className="size-3.5 text-muted-foreground" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuLabel>Chart type</DropdownMenuLabel>
+        {CHART_TYPES.map((t) => {
+          const ItemIcon = t.icon;
+          return (
+            <DropdownMenuItem key={t.id} onSelect={() => onChange(t.id)} className="gap-2">
+              <ItemIcon className="text-muted-foreground" />
+              <span className="flex-1">{t.label}</span>
+              {t.id === value ? <Check className="text-brand" /> : null}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

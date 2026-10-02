@@ -7,10 +7,10 @@ export const properties: Property[] = [
 ];
 
 export const manager: Manager = {
-  firstName: "Amit",
-  fullName: "Amit Kumar",
+  firstName: "Vinayak",
+  fullName: "Vinayak Jha",
   role: "Property Manager",
-  initials: "AK",
+  initials: "VJ",
 };
 
 export const notifications: Notification[] = [

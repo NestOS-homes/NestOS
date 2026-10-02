@@ -22,7 +22,7 @@ export function TopBar({ properties, manager, notifications }: TopBarProps) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-[76px] max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex h-[76px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         {/* Logo shows here only when the sidebar is hidden (small screens) */}
         <Logo className="lg:hidden" showText={false} />
 

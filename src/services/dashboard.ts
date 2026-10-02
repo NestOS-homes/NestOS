@@ -3,6 +3,7 @@ import { getFinanceSummary } from "@/data/mock/finance";
 import { manager, properties } from "@/data/mock/property";
 import { checkIns, payments, residentSummary } from "@/data/mock/residents";
 import { rooms } from "@/data/mock/rooms";
+import { todaySchedule } from "@/data/mock/schedule";
 import { formatINR } from "@/lib/format";
 import type { AttentionItem, DashboardData, OccupancySummary, Room } from "@/types";
 
@@ -84,5 +85,6 @@ export async function getDashboardData(propertyId = "sunrise"): Promise<Dashboar
     residents: residentSummary,
     payments,
     checkIns,
+    schedule: todaySchedule,
   };
 }

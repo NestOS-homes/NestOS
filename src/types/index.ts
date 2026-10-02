@@ -162,4 +162,15 @@ export type DashboardData = {
   residents: ResidentSummary;
   payments: PaymentRecord[];
   checkIns: CheckIn[];
+  schedule: ScheduleItem[];
+};
+
+/* ---------- Today's schedule ---------- */
+
+export type ScheduleItem = {
+  id: string;
+  time: string; // "11:30 AM"
+  title: string;
+  detail: string;
+  kind: "check-in" | "visit" | "maintenance" | "move-out";
 };
