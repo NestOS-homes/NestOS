@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "./shadcn-base.css";
 
 /* NestOS is dark-only for now. Every colour lives here, so the whole look can change from one place. */
 

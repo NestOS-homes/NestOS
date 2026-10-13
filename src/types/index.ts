@@ -15,6 +15,8 @@ export type Manager = {
   fullName: string;
   role: string;
   initials: string;
+  email?: string;
+  imageUrl?: string; // profile photo, e.g. from Google sign-in
 };
 
 /* ---------- Rooms & beds ---------- */

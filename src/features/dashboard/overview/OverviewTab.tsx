@@ -1,4 +1,5 @@
 import { getDashboardData } from "@/services/dashboard";
+import { getCurrentManager } from "@/services/session";
 import { FinanceOverview } from "./sections/FinanceOverview";
 import { NeedsAttention } from "./sections/NeedsAttention";
 import { OpenComplaints } from "./sections/OpenComplaints";
@@ -13,13 +14,13 @@ import { WelcomeHeader } from "./sections/WelcomeHeader";
  * Order on the page = order of importance: greeting → money & to-dos → rooms & complaints → residents.
  */
 export async function OverviewTab() {
-  const data = await getDashboardData();
+  const [data, manager] = await Promise.all([getDashboardData(), getCurrentManager()]);
   const { finance } = data;
   const staleComplaints = data.complaints.filter((c) => c.hoursOpen >= 24).length;
 
   return (
     <div className="space-y-6">
-      <WelcomeHeader firstName={data.manager.firstName} />
+      <WelcomeHeader firstName={manager.firstName} />
 
       {/* Row 1: chart gets the most room, then to-dos, then quick actions */}
       <div className="grid grid-cols-12 gap-4 lg:gap-5 wide:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
