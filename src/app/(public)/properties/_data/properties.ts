@@ -1,0 +1,56 @@
+import type { Property } from "../_types";
+
+export const properties: Property[] = [
+  {
+    id: "p1",
+    name: "Nest Living",
+    location: "Indirapuram, Ghaziabad",
+    description: "Furnished rooms and comfortable co-living spaces for working professionals and students.",
+    rating: 4.7,
+    reviewCount: 128,
+    distanceKm: 2.4,
+    latitude: 28.6435,
+    longitude: 77.3704,
+    priceFrom: 8500,
+    amenities: ["Wi-Fi", "Housekeeping", "Laundry", "Furnished rooms"],
+    images: [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=85",
+    ],
+  },
+  {
+    id: "p2",
+    name: "Urban Nest",
+    location: "Vaishali, Ghaziabad",
+    description: "Furnished accommodation with shared common areas and convenient access to everyday essentials.",
+    rating: 4.5,
+    reviewCount: 86,
+    distanceKm: 4.1,
+    latitude: 28.6492,
+    longitude: 77.339,
+    priceFrom: 7500,
+    amenities: ["Wi-Fi", "Common lounge", "Security", "Housekeeping"],
+    images: [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=85",
+    ],
+  },
+  {
+    id: "p3",
+    name: "The Co-Live House",
+    location: "Sector 62, Noida",
+    description: "A community-oriented living option with furnished rooms and shared facilities.",
+    rating: 4.6,
+    reviewCount: 94,
+    distanceKm: 7.8,
+    latitude: 28.627,
+    longitude: 77.3649,
+    priceFrom: 10000,
+    amenities: ["High-speed Wi-Fi", "Power backup", "Laundry", "Common area"],
+    images: [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85",
+    ],
+  },
+];
