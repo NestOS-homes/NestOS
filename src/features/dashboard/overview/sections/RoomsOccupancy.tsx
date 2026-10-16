@@ -3,6 +3,7 @@ import { SectionCard } from "@/components/shared/SectionCard";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { BedStatus, OccupancySummary, Room } from "@/types";
+import Link from "next/link";
 
 const BED_STYLE: Record<BedStatus, string> = {
   occupied: "bg-success",
@@ -153,14 +154,34 @@ function Stat({ label, value, swatch }: { label: string; value: number; swatch?:
   );
 }
 
-export function ViewButton({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      className="group flex h-9 items-center gap-1.5 rounded-full border border-border bg-[#16161b] px-3.5 text-xs font-medium text-foreground transition-colors hover:bg-[#22222a]"
-    >
+export function ViewButton({
+  label,
+  href,
+}: {
+  label: string;
+  href?: string;
+}) {
+  const className =
+    "group flex h-9 items-center gap-1.5 rounded-full border border-border bg-[#16161b] px-3.5 text-xs font-medium text-foreground transition-colors hover:bg-[#22222a]";
+
+  const content = (
+    <>
       {label}
       <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" className={className}>
+      {content}
     </button>
   );
 }

@@ -104,20 +104,39 @@ export type ResidentSummary = {
 
 /* ---------- Complaints ---------- */
 
-export type ComplaintPriority = "urgent" | "medium" | "low";
-export type ComplaintStatus = "open" | "in_progress";
+export type ComplaintPriority = "urgent" | "high" | "medium" | "low";
+
+export type ComplaintStatus =
+  | "open"
+  | "in_progress"
+  | "on_hold"
+  | "resolved"
+  | "closed";
+
+export type ComplaintCategory =
+  | "Electrical"
+  | "Plumbing"
+  | "Internet"
+  | "Furniture"
+  | "Cleaning"
+  | "Appliance"
+  | "Other";
 
 export type Complaint = {
   id: string;
   room: string;
   title: string;
-  category: "Electrical" | "Plumbing" | "Internet" | "Furniture" | "Cleaning";
+  description?: string;
+  category: ComplaintCategory;
   priority: ComplaintPriority;
   status: ComplaintStatus;
   hoursOpen: number;
   residentName: string;
   initials: string;
   assignedTo?: string;
+  raisedAt?: string;
+  resolutionNote?: string;
+  closedAt?: string;
 };
 
 /* ---------- Needs attention ---------- */

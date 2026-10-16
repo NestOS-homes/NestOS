@@ -8,29 +8,43 @@ import { cn } from "@/lib/utils";
 import type { Complaint, ComplaintPriority } from "@/types";
 import { ViewButton } from "./RoomsOccupancy";
 
-const PRIORITY: Record<ComplaintPriority, { label: string; tone: Tone; rank: number }> = {
+const PRIORITY: Record<
+  ComplaintPriority,
+  { label: string; tone: Tone; rank: number }
+> = {
   urgent: { label: "Urgent", tone: "danger", rank: 0 },
-  medium: { label: "Pending", tone: "warning", rank: 1 },
-  low: { label: "Low", tone: "info", rank: 2 },
+  high: { label: "High", tone: "warning", rank: 1 },
+  medium: { label: "Medium", tone: "warning", rank: 2 },
+  low: { label: "Low", tone: "info", rank: 3 },
 };
 
 /** Open complaints, most urgent first. */
 export function OpenComplaints({ complaints, limit = 4 }: { complaints: Complaint[]; limit?: number }) {
-  const sorted = [...complaints].sort(
-    (a, b) => PRIORITY[a.priority].rank - PRIORITY[b.priority].rank || b.hoursOpen - a.hoursOpen
-  );
-  const urgent = complaints.filter((c) => c.priority === "urgent").length;
+  const activeComplaints = complaints.filter(
+  (c) => c.status !== "closed" && c.status !== "resolved"
+);
+
+const sorted = [...activeComplaints].sort(
+  (a, b) =>
+    PRIORITY[a.priority].rank - PRIORITY[b.priority].rank ||
+    b.hoursOpen - a.hoursOpen
+);
+
+const urgent = activeComplaints.filter(
+  (c) => c.priority === "urgent"
+).length;
 
   return (
     <SectionCard
-      title="Open complaints"
-      description={
-        <>
-          {complaints.length} open · <span className="text-danger">{urgent} urgent</span>
-        </>
-      }
-      action={<ViewButton label="View all" />}
-    >
+  title="Open complaints"
+  description={
+    <>
+      {activeComplaints.length} open ·{" "}
+      <span className="text-danger">{urgent} urgent</span>
+    </>
+  }
+  action={<ViewButton label="View all" href="/complaints" />}
+>
       <div className="@container">
         <ul className="grid gap-2.5 @sm:grid-cols-2 @4xl:grid-cols-4">
           {sorted.slice(0, limit).map((c) => (

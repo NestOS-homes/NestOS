@@ -31,7 +31,7 @@ export const mainNav: NavItem[] = [
   { label: "Rooms & Beds", href: "/rooms", icon: BedDouble, ready: false },
   { label: "Residents", href: "/residents", icon: Users, ready: false },
   { label: "Rent & Payments", href: "/payments", icon: IndianRupee, ready: false },
-  { label: "Complaints", href: "/complaints", icon: MessageSquareWarning, ready: false, badge: 5 },
+  { label: "Complaints", href: "/complaints", icon: MessageSquareWarning, ready: true, badge: 5 },
   { label: "Finance", href: "/finance", icon: Wallet, ready: false },
   { label: "Staff", href: "/staff", icon: UserCog, ready: false },
   { label: "Inventory", href: "/inventory", icon: Boxes, ready: false },
