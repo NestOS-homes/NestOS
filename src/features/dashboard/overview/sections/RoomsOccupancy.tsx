@@ -30,7 +30,7 @@ export function RoomsOccupancy({ summary, rooms }: RoomsOccupancyProps) {
     <SectionCard
       title="Rooms & occupancy"
       description={`${rooms.length} rooms · ${floors.length} floors`}
-      action={<ViewButton label="View rooms" />}
+      action={<ViewButton label="View rooms" href="/dashboard/occupancy" />}
     >
       <div className="grid gap-5 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-center">
         <Bubbles summary={summary} />
