@@ -9,7 +9,7 @@ import {
   Search,
   UserRoundPlus,
 } from "lucide-react";
-
+import { getOccupancySummary } from "@/services/occupancy";
 import { rooms } from "@/data/mock/rooms";
 import type { BedStatus, Room } from "@/types";
 
@@ -31,23 +31,14 @@ export function OccupancyTab() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const summary = useMemo(() => {
-    const beds = rooms.flatMap((room) => room.beds);
-    const occupied = beds.filter((bed) => bed.status === "occupied").length;
-    const available = beds.filter((bed) => bed.status === "available").length;
-    const vacating = beds.filter((bed) => bed.status === "vacating").length;
+  const occupancy = getOccupancySummary(rooms);
 
-    return {
-      rooms: rooms.length,
-      floors: new Set(rooms.map((room) => room.floor)).size,
-      totalBeds: beds.length,
-      occupied,
-      available,
-      vacating,
-      occupancyRate: beds.length
-        ? Math.round((occupied / beds.length) * 100)
-        : 0,
-    };
-  }, []);
+  return {
+    rooms: rooms.length,
+    floors: new Set(rooms.map((room) => room.floor)).size,
+    ...occupancy,
+  };
+}, []);
 
   const floors = useMemo(
     () => [...new Set(rooms.map((room) => room.floor))].sort((a, b) => a - b),

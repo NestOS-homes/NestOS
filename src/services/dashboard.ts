@@ -1,6 +1,7 @@
 import { complaints, complaintsResolvedRate } from "@/data/mock/complaints";
 import { getFinanceSummary } from "@/data/mock/finance";
 import { manager, properties } from "@/data/mock/property";
+import { getOccupancySummary } from "@/services/occupancy";
 import { checkIns, payments, residentSummary } from "@/data/mock/residents";
 import { rooms } from "@/data/mock/rooms";
 import { todaySchedule } from "@/data/mock/schedule";
@@ -12,20 +13,6 @@ import type { AttentionItem, DashboardData, OccupancySummary, Room } from "@/typ
  * Today it reads sample data. Later, only this file changes to call the real API —
  * the dashboard components stay the same.
  */
-
-function summariseOccupancy(list: Room[]): OccupancySummary {
-  const beds = list.flatMap((r) => r.beds);
-  const occupied = beds.filter((b) => b.status === "occupied").length;
-  const available = beds.filter((b) => b.status === "available").length;
-  const vacating = beds.filter((b) => b.status === "vacating").length;
-  return {
-    totalBeds: beds.length,
-    occupied,
-    available,
-    vacating,
-    occupancyRate: Math.round((occupied / beds.length) * 100),
-  };
-}
 
 function buildAttention(list: Room[]): AttentionItem[] {
   const overdue = payments.filter((p) => p.status === "overdue");
@@ -78,7 +65,7 @@ export async function getDashboardData(propertyId = "sunrise"): Promise<Dashboar
     manager,
     attention: buildAttention(rooms),
     finance: getFinanceSummary(today),
-    occupancy: summariseOccupancy(rooms),
+    occupancy: getOccupancySummary(rooms),
     rooms,
     complaints,
     complaintsResolvedRate,

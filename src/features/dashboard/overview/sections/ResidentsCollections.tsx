@@ -1,25 +1,17 @@
-import { BellRing, LogIn, ReceiptText } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { BellRing } from "lucide-react";
 import { InitialsAvatar } from "@/components/shared/InitialsAvatar";
 import { SectionCard } from "@/components/shared/SectionCard";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { StatusDot, type Tone } from "@/components/shared/StatusDot";
-import { Progress } from "@/components/ui/progress";
-import { formatINR, formatINRCompact } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import type { CheckIn, PaymentRecord, PaymentStatus, ResidentSummary } from "@/types";
-import { ViewButton } from "./RoomsOccupancy";
-
-const STATUS: Record<PaymentStatus, { label: string; tone: Tone; bar: string }> = {
-  paid: { label: "Paid", tone: "success", bar: "bg-success" },
-  due: { label: "Due", tone: "warning", bar: "bg-warning" },
-  overdue: { label: "Overdue", tone: "danger", bar: "bg-danger" },
-};
+import { formatINR } from "@/lib/format";
+import type { PaymentRecord, ResidentSummary, Room } from "@/types";
 
 type ResidentsCollectionsProps = {
   monthLabel: string;
   residents: ResidentSummary;
   payments: PaymentRecord[];
-  checkIns: CheckIn[];
+  rooms: Room[];
   collected: number;
   expected: number;
   due: number;
@@ -27,125 +19,143 @@ type ResidentsCollectionsProps = {
   collectionRate: number;
 };
 
-/** Who has paid this month, who hasn't, and who to chase. */
-export function ResidentsCollections(props: ResidentsCollectionsProps) {
-  const { residents, payments } = props;
-  const groups: { status: PaymentStatus; count: number; amount: number }[] = [
-    { status: "paid", count: residents.paid, amount: props.collected },
-    { status: "due", count: residents.due, amount: props.due },
-    { status: "overdue", count: residents.overdue, amount: props.overdue },
+/** Collection summary and overdue rent follow-ups. */
+export function ResidentsCollections({
+  monthLabel,
+  residents,
+  payments,
+  rooms,
+}: ResidentsCollectionsProps) {
+  const [reminderNotice, setReminderNotice] = useState("");
+
+  // Use Rooms & Beds as the source of truth for resident names and bed IDs.
+  const bedsById = new Map(
+    rooms.flatMap((room) =>
+      room.beds.map((bed) => [bed.id, bed] as const)
+    )
+  );
+
+  const overduePayments = payments.filter(
+    (payment) => payment.status === "overdue"
+  );
+
+  const summaryCards = [
+    { label: "Total Residents", value: residents.total },
+    { label: "Paid", value: residents.paid },
+    { label: "Due", value: residents.due },
+    { label: "Overdue", value: residents.overdue },
   ];
 
   return (
     <SectionCard
-      title="Residents & collections"
-      description={`${props.monthLabel} rent · ${residents.total} residents`}
-      action={<ViewButton label="View residents" />}
+      title="Collection & Follow-up"
+      description={`${monthLabel} rent collection`}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        {/* Summary */}
-        <div className="flex flex-col">
-          <div className="flex items-end gap-2">
-            <p className="text-[44px] leading-none font-normal tracking-[-0.05em]">{residents.total}</p>
-            <p className="pb-1 text-sm text-muted-foreground">residents this month</p>
-          </div>
-
-          <p className="mt-5 mb-2 text-xs text-muted-foreground">Payment status</p>
-          <div className="flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden>
-            {groups.map((g) => (
-              <div key={g.status} className={cn("h-full first:rounded-l-full last:rounded-r-full", STATUS[g.status].bar)} style={{ width: `${(g.count / residents.total) * 100}%` }} />
-            ))}
-          </div>
-
-          <dl className="mt-3 grid grid-cols-3 gap-2.5">
-            {groups.map((g) => (
-              <div key={g.status} className="surface-tile rounded-xl px-3 py-2.5">
-                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <StatusDot tone={STATUS[g.status].tone} />
-                  {STATUS[g.status].label}
-                </dt>
-                <dd className="mt-1 text-xl leading-none font-medium">{g.count}</dd>
-                <dd className="mt-1 text-[11px] text-subtle">{formatINRCompact(g.amount)}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <div className="mt-5">
-            <div className="mb-2 flex items-baseline justify-between text-xs">
-              <span className="text-muted-foreground">Collection progress</span>
-              <span>
-                <span className="font-medium text-foreground">{formatINRCompact(props.collected)}</span>
-                <span className="text-muted-foreground"> of {formatINRCompact(props.expected)} · {props.collectionRate}%</span>
-              </span>
+      <div className="space-y-6">
+        {/* Existing resident summary numbers */}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {summaryCards.map((card) => (
+            <div
+              key={card.label}
+              className="surface-tile rounded-xl border border-border px-4 py-3"
+            >
+              <p className="text-xs text-muted-foreground">{card.label}</p>
+              <p className="mt-2 text-2xl font-medium tracking-tight">
+                {card.value}
+              </p>
             </div>
-            <Progress value={props.collectionRate} aria-label="Rent collected" className="h-2 bg-[#2a2a33]" indicatorClassName="bg-success" />
-          </div>
-
-          <div className="mt-6">
-            <h3 className="mb-2 flex items-center gap-2 text-sm font-medium">
-              <LogIn className="size-4 text-info" /> Arriving today
-            </h3>
-            <ul className="space-y-2">
-              {props.checkIns.map((c) => (
-                <li key={c.bed} className="surface-tile flex items-center gap-3 rounded-xl px-3 py-2.5">
-                  <InitialsAvatar name={c.residentName} initials={c.initials} size="sm" />
-                  <span className="min-w-0 flex-1 truncate text-sm">{c.residentName}</span>
-                  <span className="text-xs text-muted-foreground">Bed {c.bed}</span>
-                  <StatusBadge tone="info" withDot={false}>
-                    {c.time}
-                  </StatusBadge>
-                </li>
-              ))}
-            </ul>
-          </div>
+          ))}
         </div>
 
-        {/* Follow-ups and recent payments */}
+        {/* Overdue payments only */}
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-medium">Follow up & recent payments</h3>
-            <span className="text-xs text-muted-foreground">Overdue first</span>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-medium">Overdue payments</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Residents who need a rent payment reminder
+              </p>
+            </div>
+
+            <span className="rounded-full bg-danger/10 px-3 py-1 text-xs font-medium text-danger">
+              {overduePayments.length} overdue
+            </span>
           </div>
-          <ul className="divide-y divide-white/[0.06] rounded-2xl border border-border">
-            {payments.map((p) => (
-              <PaymentRow key={p.id} payment={p} />
-            ))}
-          </ul>
+
+          {overduePayments.length === 0 ? (
+            <div className="rounded-xl border border-border p-6 text-center">
+              <p className="text-sm font-medium">No overdue payments</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                All recorded rent payments are up to date.
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border rounded-xl border border-border">
+              {overduePayments.map((payment) => {
+                const bed = bedsById.get(payment.room);
+                const residentName = bed?.residentName ?? payment.residentName;
+                const initials = residentName
+                  .split(/\s+/)
+                  .map((part) => part[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase();
+
+                return (
+                  <li
+                    key={payment.id}
+                    className="flex flex-wrap items-center gap-3 px-3 py-3 sm:px-4"
+                  >
+                    <InitialsAvatar
+                      name={residentName}
+                      initials={initials}
+                    />
+
+                    <div className="min-w-[140px] flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {residentName}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Room {payment.room.split("-")[0]} · Bed{" "}
+                        {payment.room.split("-")[1]}
+                      </p>
+                      <p className="mt-1 text-xs text-danger">
+                        {payment.note}
+                      </p>
+                    </div>
+
+                    <p className="text-sm font-semibold tabular-nums">
+                      {formatINR(payment.amount)}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setReminderNotice(
+                          `Reminder action for ${residentName} is not connected yet. No message was sent.`
+                        )
+                      }
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-brand/15 px-3 text-xs font-medium text-brand transition-colors hover:bg-brand/25"
+                    >
+                      <BellRing className="size-3.5" />
+                      Remind
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {reminderNotice ? (
+            <p
+              role="status"
+              className="mt-3 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground"
+            >
+              {reminderNotice}
+            </p>
+          ) : null}
         </div>
       </div>
     </SectionCard>
-  );
-}
-
-function PaymentRow({ payment: p }: { payment: PaymentRecord }) {
-  const s = STATUS[p.status];
-  const needsReminder = p.status !== "paid";
-
-  return (
-    <li className="flex items-center gap-3 px-3.5 py-2.5">
-      <InitialsAvatar name={p.residentName} initials={p.initials} />
-      <div className="min-w-0 flex-1 leading-tight">
-        <p className="truncate text-sm">{p.residentName}</p>
-        <p className="text-xs text-muted-foreground">Bed {p.room}</p>
-      </div>
-      <div className="hidden w-[170px] sm:block">
-        <StatusBadge tone={s.tone}>{s.label}</StatusBadge>
-        <p className={cn("mt-1 text-[11px]", p.status === "overdue" ? "text-danger" : "text-subtle")}>
-          {p.note}
-          {p.method ? ` · ${p.method}` : ""}
-        </p>
-      </div>
-      <p className="w-[78px] text-right text-sm font-medium tabular-nums">{formatINR(p.amount)}</p>
-      <button
-        type="button"
-        className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-full text-xs font-medium transition-colors sm:w-[92px]",
-          needsReminder ? "bg-brand/15 text-brand hover:bg-brand/25" : "bg-white/[0.06] text-muted-foreground hover:text-foreground"
-        )}
-      >
-        {needsReminder ? <BellRing className="size-3.5" /> : <ReceiptText className="size-3.5" />}
-        <span className="sr-only sm:not-sr-only">{needsReminder ? "Remind" : "Receipt"}</span>
-      </button>
-    </li>
   );
 }

@@ -14,6 +14,7 @@ export const complaints: Complaint[] = [
     residentName: "Rohan Kumar",
     initials: "RK",
     raisedAt: "2026-10-16T09:50:00",
+    slaDueAt: "2026-10-20T18:00:00",
   },
   {
     id: "c-1038",
@@ -28,6 +29,7 @@ export const complaints: Complaint[] = [
     residentName: "Sneha Iyer",
     initials: "SI",
     raisedAt: "2026-10-15T10:00:00",
+    slaDueAt: "2026-10-21T18:00:00",
   },
   {
     id: "c-1040",
@@ -43,6 +45,7 @@ export const complaints: Complaint[] = [
     initials: "PS",
     assignedTo: "Ramesh (Plumber)",
     raisedAt: "2026-10-16T06:30:00",
+    slaDueAt: "2026-10-21T18:00:00",
   },
   {
     id: "c-1036",
@@ -57,6 +60,7 @@ export const complaints: Complaint[] = [
     residentName: "Arjun Nair",
     initials: "AN",
     raisedAt: "2026-10-15T08:00:00",
+    slaDueAt: "2026-10-20T18:00:00",
   },
   {
     id: "c-1031",
@@ -72,6 +76,7 @@ export const complaints: Complaint[] = [
     initials: "MJ",
     assignedTo: "Suresh (Carpenter)",
     raisedAt: "2026-10-14T06:00:00",
+    slaDueAt: "2026-10-19T18:00:00",
   },
   {
     id: "c-1029",

@@ -139,6 +139,7 @@ export type Complaint = {
   initials: string;
   assignedTo?: string;
   raisedAt?: string;
+  slaDueAt?: string;
   resolutionNote?: string;
   closedAt?: string;
 };
