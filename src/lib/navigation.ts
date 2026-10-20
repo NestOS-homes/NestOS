@@ -65,12 +65,12 @@ export const mainNav: NavItem[] = [
     icon: MessageSquareWarning,
     ready: true,
     badge: 5,
-  },
+  },  
   {
     label: "Finance",
     href: "/finance",
     icon: Wallet,
-    ready: false,
+    ready: true,
   },
   {
     label: "Inventory",
