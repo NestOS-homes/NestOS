@@ -2,6 +2,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
   type ChangeEvent,
@@ -89,14 +90,38 @@ export function AddResidentForm() {
   const [roomNumber, setRoomNumber] = useState("");
   const [bedId, setBedId] = useState("");
   const [startDate, setStartDate] = useState("");
+  const [previousEndDate, setPreviousEndDate] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [aadhaar, setAadhaar] = useState("");
   const [error, setError] = useState("");
   const [demoNotice, setDemoNotice] = useState(false);
-
   const [photoPreview, setPhotoPreview] = useState("");
-const [photoError, setPhotoError] = useState("");
+  const [photoError, setPhotoError] = useState("");
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+
+  const requestedType = params.get("occupancyType");
+  const requestedRoom = params.get("room") ?? "";
+  const requestedBed = params.get("bed") ?? "";
+  const requestedStart = params.get("startDate") ?? "";
+  const requestedEnd = params.get("previousEndDate") ?? "";
+
+  if (
+    requestedType === "single" ||
+    requestedType === "double" ||
+    requestedType === "triple" ||
+    requestedType === "colive"
+  ) {
+    setOccupancyType(requestedType);
+  }
+
+  setRoomNumber(requestedRoom);
+  setBedId(requestedBed);
+  setPreviousEndDate(requestedEnd);
+  setStartDate(requestedStart);
+}, []);
 
 function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
   const file = event.target.files?.[0];
@@ -207,7 +232,8 @@ if (!startDate) {
 if (
   selectedBed &&
   selectedBed.status !== "available" &&
-  !selectedBed.occupancyEndDate
+  !selectedBed.occupancyEndDate &&
+  !previousEndDate
 ) {
   setError(
     "This bed is occupied and has no recorded occupancy end date. Record the end date before assigning a new resident."
@@ -215,12 +241,15 @@ if (
   return;
 }
 
+const effectiveEndDate =
+  previousEndDate || selectedBed?.occupancyEndDate || "";
+
 if (
-  selectedBed?.occupancyEndDate &&
-  startDate <= selectedBed.occupancyEndDate
+  effectiveEndDate &&
+  startDate <= effectiveEndDate
 ) {
   setError(
-    `Start date must be after the current occupancy end date (${formatDate(selectedBed.occupancyEndDate)}).`
+    `Start date must be after the current occupancy end date (${formatDate(effectiveEndDate)}).`
   );
   return;
 }
@@ -419,10 +448,12 @@ if (startDate < new Date().toLocaleDateString("en-CA")) {
     type="date"
     value={startDate}
     min={
-      selectedBed?.occupancyEndDate
-        ? nextDate(selectedBed.occupancyEndDate)
-        : undefined
-    }
+  previousEndDate
+    ? nextDate(previousEndDate)
+    : selectedBed?.occupancyEndDate
+      ? nextDate(selectedBed.occupancyEndDate)
+      : undefined
+}
     disabled={
       Boolean(
         selectedBed &&
@@ -437,6 +468,29 @@ if (startDate < new Date().toLocaleDateString("en-CA")) {
     }}
     className="h-10 bg-input/30"
   />
+  
+{previousEndDate && (
+  <p className="mt-1.5 text-xs text-muted-foreground">
+    Previous occupancy ends on{" "}
+    <span className="font-medium text-foreground">
+      {formatDate(previousEndDate)}
+    </span>
+    . Earliest new start date:{" "}
+    <span className="font-medium text-foreground">
+      {formatDate(nextDate(previousEndDate))}
+    </span>
+    .
+  </p>
+)}
+
+{startDate &&
+  previousEndDate &&
+  startDate <= previousEndDate && (
+    <p role="alert" className="mt-1.5 text-xs text-danger">
+      The new start date must be after the previous occupancy end date.
+    </p>
+  )}
+
 
   {selectedBed?.status === "available" && (
     <p className="mt-1.5 text-xs text-success">

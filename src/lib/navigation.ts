@@ -52,13 +52,13 @@ export const mainNav: NavItem[] = [
   icon: UserCog,
   ready: true,
 },
+{
+  label: "Rent & Payments",
+  href: "/dashboard/rent",
+  icon: IndianRupee,
+  ready: true,
+},
 
-  {
-    label: "Rent & Payments",
-    href: "/payments",
-    icon: IndianRupee,
-    ready: false,
-  },
   {
     label: "Complaints",
     href: "/complaints",
