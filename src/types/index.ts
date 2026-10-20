@@ -28,11 +28,13 @@ export type Bed = {
   label: string;
   status: BedStatus;
   residentName?: string;
+  phoneNumber?: string;
 
   // Mock occupancy end date, in YYYY-MM-DD format.
   // null means an occupied bed has no recorded end date.
   occupancyEndDate?: string | null;
 };
+
 
 export type Room = {
   number: string; // "207"

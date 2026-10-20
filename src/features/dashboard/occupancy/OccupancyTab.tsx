@@ -12,6 +12,7 @@ import {
 import { getOccupancySummary } from "@/services/occupancy";
 import { rooms } from "@/data/mock/rooms";
 import type { BedStatus, Room } from "@/types";
+import { RoomDirectoryModal } from "./RoomDirectoryModal";
 
 const STATUS_LABEL: Record<BedStatus, string> = {
   occupied: "Occupied",
@@ -29,6 +30,7 @@ export function OccupancyTab() {
   const [search, setSearch] = useState("");
   const [floorFilter, setFloorFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [activeRoom, setActiveRoom] = useState<Room | null>(null);
 
   const summary = useMemo(() => {
   const occupancy = getOccupancySummary(rooms);
@@ -217,7 +219,11 @@ export function OccupancyTab() {
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {group.rooms.map((room) => (
-                    <RoomCard key={room.number} room={room} />
+                    <RoomCard
+                      key={room.number}
+                      room={room}
+                      onClick={() => setActiveRoom(room)}
+                    />
                   ))}
                 </div>
               </section>
@@ -231,6 +237,10 @@ export function OccupancyTab() {
         Resident approvals and live bed assignments are not connected to a
         backend yet.
       </p>
+      <RoomDirectoryModal
+        room={activeRoom}
+        onClose={() => setActiveRoom(null)}
+      />
     </div>
   );
 }
@@ -258,13 +268,31 @@ function SummaryCard({
   );
 }
 
-function RoomCard({ room }: { room: Room }) {
+function RoomCard({
+  room,
+  onClick,
+}: {
+  room: Room;
+  onClick: () => void;
+}) {
   const availableCount = room.beds.filter(
     (bed) => bed.status === "available"
   ).length;
 
   return (
-    <article className="rounded-xl border border-border bg-background/40 p-4">
+    <article
+      role="button"
+      tabIndex={0}
+      aria-label={`Open resident directory for Room ${room.number}`}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      className="cursor-pointer rounded-xl border border-border bg-background/40 p-4 transition hover:border-brand/40 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <h4 className="font-medium">Room {room.number}</h4>

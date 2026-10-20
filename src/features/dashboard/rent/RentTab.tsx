@@ -8,6 +8,7 @@ import {
   CalendarClock,
   CalendarDays,
   CheckCircle2,
+  Phone,
   ChevronDown,
   ChevronRight,
   CircleAlert,
@@ -366,20 +367,49 @@ export function RentTab() {
                     ? ` · ${selectedBed.bed.residentName}`
                     : ""}
                 </h2>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-border px-2 py-1 text-xs">
-                    {selectedBed.bed.status === "available"
-                      ? "Vacant"
-                      : selectedBed.bed.status === "vacating"
-                        ? "Vacating"
-                        : "Occupied"}
-                  </span>
-                  <span
-                    className={`rounded-full border px-2 py-1 text-xs ${rentStatusClass(selectedBed.rentStatus)}`}
-                  >
-                    Rent {statusLabel(selectedBed.rentStatus)}
-                  </span>
+              {selectedBed.bed.status !== "available" && (
+                <div className="mt-3 flex items-center gap-3 rounded-xl border border-brand/20 bg-brand/5 p-3">
+                  <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand/10 text-brand">
+                    <Phone className="size-5" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">
+                      Resident phone number
+                    </p>
+
+                    {selectedBed.bed.phoneNumber ? (
+                      <a
+                        href={`tel:${selectedBed.bed.phoneNumber}`}
+                        className="mt-1 block truncate text-base font-semibold text-brand hover:underline"
+                      >
+                        {selectedBed.bed.phoneNumber}
+                      </a>
+                    ) : (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Phone number not added
+                      </p>
+                    )}
+                  </div>
                 </div>
+              )}
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="rounded-full border border-border px-2 py-1 text-xs">
+                  {selectedBed.bed.status === "available"
+                    ? "Vacant"
+                    : selectedBed.bed.status === "vacating"
+                      ? "Vacating"
+                      : "Occupied"}
+                </span>
+
+                <span
+                  className={`rounded-full border px-2 py-1 text-xs ${rentStatusClass(selectedBed.rentStatus)}`}
+                >
+                  Rent {statusLabel(selectedBed.rentStatus)}
+                </span>
+              </div>
+
               </div>
               <button
                 type="button"

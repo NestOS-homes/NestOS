@@ -55,6 +55,7 @@ return {
     status === "available"
       ? undefined
       : `${FIRST_NAMES[n % FIRST_NAMES.length]} ${LAST_NAMES[(n * 7) % LAST_NAMES.length]}`,
+  phoneNumber: undefined, // Replace with a real test number when available.
   occupancyEndDate,
 };
       });
