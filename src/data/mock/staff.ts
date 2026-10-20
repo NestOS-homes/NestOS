@@ -1,0 +1,160 @@
+
+import type { StaffMember } from "@/types";
+
+export const staffMembers: StaffMember[] = [
+  {
+    id: "staff-001",
+    fullName: "Rajesh Kumar",
+    phone: "+91 98765 43210",
+    photoUrl:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces",
+    role: "Property Manager",
+    monthlySalary: 28000,
+    salaryStatus: "paid",
+    salaryPeriod: "October 2026",
+    approvalStatus: "approved",
+    assignedComplaints: [
+      {
+        id: "SC-101",
+        title: "AC not cooling",
+        room: "Room 204",
+        status: "in_progress",
+      },
+      {
+        id: "SC-102",
+        title: "Wi-Fi keeps disconnecting",
+        room: "Room 405",
+        status: "open",
+      },
+    ],
+  },
+  {
+    id: "staff-002",
+    fullName: "Sunita Devi",
+    phone: "+91 98765 43211",
+    photoUrl:
+      "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=160&h=160&fit=crop",
+    role: "Housekeeping",
+    monthlySalary: 16000,
+    salaryStatus: "pending",
+    salaryPeriod: "October 2026",
+    approvalStatus: "approved",
+    assignedComplaints: [
+      {
+        id: "SC-103",
+        title: "Bathroom cleaning",
+        room: "Room 204",
+        status: "assigned",
+      },
+      {
+        id: "SC-104",
+        title: "Common area cleaning",
+        room: "Common area",
+        status: "open",
+      },
+      {
+        id: "SC-105",
+        title: "Room preparation",
+        room: "Room 108",
+        status: "in_progress",
+      },
+    ],
+  },
+  {
+    id: "staff-003",
+    fullName: "Amit Singh",
+    phone: "+91 98765 43212",
+    photoUrl:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&crop=faces",
+    role: "Maintenance",
+    monthlySalary: 20000,
+    salaryStatus: "paid",
+    salaryPeriod: "October 2026",
+    approvalStatus: "approved",
+    assignedComplaints: [
+      {
+        id: "SC-106",
+        title: "Water leakage near window",
+        room: "Room 302",
+        status: "in_progress",
+      },
+    ],
+  },
+  {
+    id: "staff-004",
+    fullName: "Priya Sharma",
+    phone: "+91 98765 43213",
+    photoUrl:
+      "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=160&h=160&fit=crop",
+    role: "Front Desk",
+    monthlySalary: 18000,
+    salaryStatus: "paid",
+    salaryPeriod: "October 2026",
+    approvalStatus: "approved",
+    assignedComplaints: [],
+  },
+  {
+    id: "staff-005",
+    fullName: "Ramesh Yadav",
+    phone: "+91 98765 43214",
+    role: "Security",
+    monthlySalary: 15000,
+    salaryStatus: "pending",
+    salaryPeriod: "October 2026",
+    approvalStatus: "approved",
+    assignedComplaints: [
+      {
+        id: "SC-107",
+        title: "Entry gate light not working",
+        room: "Main gate",
+        status: "assigned",
+      },
+      {
+        id: "SC-108",
+        title: "Visitor register update",
+        room: "Reception",
+        status: "open",
+      },
+    ],
+  },
+  {
+    id: "staff-006",
+    fullName: "Neha Verma",
+    phone: "+91 98765 43215",
+    role: "Housekeeping",
+    monthlySalary: 16000,
+    salaryStatus: "paid",
+    salaryPeriod: "October 2026",
+    approvalStatus: "approved",
+    assignedComplaints: [
+      {
+        id: "SC-109",
+        title: "Replace bathroom supplies",
+        room: "Room 110",
+        status: "assigned",
+      },
+    ],
+  },
+  {
+    id: "staff-007",
+    fullName: "Mohan Das",
+    phone: "+91 98765 43216",
+    role: "Cook",
+    monthlySalary: 19000,
+    salaryStatus: "pending",
+    salaryPeriod: "October 2026",
+    approvalStatus: "pending_approval",
+    assignedComplaints: [],
+  },
+  {
+    id: "staff-008",
+    fullName: "Vikram Patel",
+    phone: "+91 98765 43217",
+    role: "Maintenance",
+    monthlySalary: 17000,
+    salaryStatus: "paid",
+    salaryPeriod: "October 2026",
+    approvalStatus: "rejected",
+    assignedComplaints: [],
+  },
+];

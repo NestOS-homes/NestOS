@@ -33,15 +33,30 @@ function buildRooms(): Room[] {
         const id = `${number}-${label}`;
         const status = statusFor(id);
         n++;
-        return {
-          id,
-          label,
-          status,
-          residentName:
-            status === "available"
-              ? undefined
-              : `${FIRST_NAMES[n % FIRST_NAMES.length]} ${LAST_NAMES[(n * 7) % LAST_NAMES.length]}`,
-        };
+        const occupancyEndDate =
+  status === "vacating"
+    ? {
+        "108-A": "2026-10-25",
+        "108-B": "2026-10-28",
+        "204-C": "2026-11-05",
+        "301-B": "2026-10-22",
+        "404-A": "2026-11-10",
+        "410-B": "2026-10-30",
+      }[id] ?? null
+    : status === "occupied"
+      ? null
+      : undefined;
+
+return {
+  id,
+  label,
+  status,
+  residentName:
+    status === "available"
+      ? undefined
+      : `${FIRST_NAMES[n % FIRST_NAMES.length]} ${LAST_NAMES[(n * 7) % LAST_NAMES.length]}`,
+  occupancyEndDate,
+};
       });
       rooms.push({ number, floor, sharing, beds });
     }

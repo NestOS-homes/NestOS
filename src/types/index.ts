@@ -24,10 +24,14 @@ export type Manager = {
 export type BedStatus = "occupied" | "available" | "vacating";
 
 export type Bed = {
-  id: string; // e.g. "207-B"
-  label: string; // "A", "B", "C"
+  id: string;
+  label: string;
   status: BedStatus;
   residentName?: string;
+
+  // Mock occupancy end date, in YYYY-MM-DD format.
+  // null means an occupied bed has no recorded end date.
+  occupancyEndDate?: string | null;
 };
 
 export type Room = {
@@ -194,4 +198,59 @@ export type ScheduleItem = {
   title: string;
   detail: string;
   kind: "check-in" | "visit" | "maintenance" | "move-out";
+};
+
+
+
+/* ---------- Staff management ---------- */
+
+export type StaffRole =
+  | "Property Manager"
+  | "Housekeeping"
+  | "Maintenance"
+  | "Security"
+  | "Front Desk"
+  | "Cook"
+  | "Other";
+
+export type StaffSalaryStatus = "paid" | "pending";
+
+export type StaffApprovalStatus =
+  | "pending_approval"
+  | "approved"
+  | "rejected";
+
+export type StaffComplaintStatus =
+  | "open"
+  | "assigned"
+  | "in_progress"
+  | "resolved";
+
+export type StaffComplaint = {
+  id: string;
+  title: string;
+  room: string;
+  status: StaffComplaintStatus;
+};
+
+export type StaffMember = {
+  id: string;
+  fullName: string;
+  phone: string;
+  photoUrl?: string;
+  role: StaffRole;
+  monthlySalary: number;
+  salaryStatus: StaffSalaryStatus;
+  salaryPeriod: string;
+  approvalStatus: StaffApprovalStatus;
+  assignedComplaints: StaffComplaint[];
+};
+
+export type NewStaffSubmission = {
+  fullName: string;
+  aadhaarNumber: string;
+  phone: string;
+  photoUrl: string;
+  role: StaffRole;
+  monthlySalary: number;
 };

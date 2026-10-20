@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /** Bottom bar on phones and tablets, replacing the sidebar. Shows the first 5 sections. */
 export function MobileNav() {
   const pathname = usePathname();
-  const items = mainNav.slice(0, 5);
+  const items = mainNav.slice(0, 6);
 
   return (
     <nav

@@ -45,6 +45,14 @@ export const mainNav: NavItem[] = [
     icon: UserRoundPlus,
     ready: true,
   },
+  
+{
+  label: "Staff",
+  href: "/dashboard/staff",
+  icon: UserCog,
+  ready: true,
+},
+
   {
     label: "Rent & Payments",
     href: "/payments",
@@ -62,12 +70,6 @@ export const mainNav: NavItem[] = [
     label: "Finance",
     href: "/finance",
     icon: Wallet,
-    ready: false,
-  },
-  {
-    label: "Staff",
-    href: "/staff",
-    icon: UserCog,
     ready: false,
   },
   {

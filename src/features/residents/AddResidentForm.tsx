@@ -1,7 +1,13 @@
 
 "use client";
 
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -11,6 +17,9 @@ import {
   Info,
   ShieldCheck,
   UserRoundPlus,
+  Camera,
+ImagePlus,
+X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -60,25 +69,81 @@ function roomMatchesType(room: Room, type: OccupancyType) {
   return true;
 }
 
+function nextDate(date: string) {
+  const result = new Date(`${date}T00:00:00Z`);
+  result.setUTCDate(result.getUTCDate() + 1);
+  return result.toISOString().slice(0, 10);
+}
+
+function formatDate(date: string) {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function AddResidentForm() {
   const [occupancyType, setOccupancyType] = useState<OccupancyType | "">("");
   const [roomNumber, setRoomNumber] = useState("");
   const [bedId, setBedId] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [aadhaar, setAadhaar] = useState("");
   const [error, setError] = useState("");
   const [demoNotice, setDemoNotice] = useState(false);
 
+  const [photoPreview, setPhotoPreview] = useState("");
+const [photoError, setPhotoError] = useState("");
+
+function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!allowedTypes.includes(file.type)) {
+    setPhotoError("Choose a JPG, PNG or WEBP image.");
+    event.target.value = "";
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    setPhotoError("Photo must be 5 MB or smaller.");
+    event.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    if (typeof reader.result === "string") {
+      setPhotoPreview(reader.result);
+      setPhotoError("");
+      setError("");
+      setDemoNotice(false);
+    }
+  };
+
+  reader.onerror = () => {
+    setPhotoError("Unable to read this photo. Please try another image.");
+  };
+
+  reader.readAsDataURL(file);
+}
+
   const eligibleRooms = useMemo(() => {
     if (!occupancyType) return [];
 
     return rooms
       .filter(
-        (room) =>
-          roomMatchesType(room, occupancyType) &&
-          availableBeds(room).length > 0
-      )
+  (room) =>
+    roomMatchesType(room, occupancyType) &&
+    room.beds.length > 0
+)
       .sort(
         (a, b) =>
           a.floor - b.floor || a.number.localeCompare(b.number)
@@ -88,14 +153,18 @@ export function AddResidentForm() {
   const selectedRoom = eligibleRooms.find(
     (room) => room.number === roomNumber
   );
+  const selectedBed = selectedRoom?.beds.find(
+  (bed) => bed.id === bedId
+);
 
-  const eligibleBeds = selectedRoom ? availableBeds(selectedRoom) : [];
+  const eligibleBeds = selectedRoom ? selectedRoom.beds : [];
 
   function changeOccupancyType(value: OccupancyType | "") {
     setOccupancyType(value);
     setRoomNumber("");
     setBedId("");
     setError("");
+    setStartDate("");
     setDemoNotice(false);
   }
 
@@ -129,6 +198,37 @@ export function AddResidentForm() {
       setError("Enter a 12-digit Aadhaar number.");
       return;
     }
+
+if (!startDate) {
+  setError("Choose the resident's start date.");
+  return;
+}
+
+if (
+  selectedBed &&
+  selectedBed.status !== "available" &&
+  !selectedBed.occupancyEndDate
+) {
+  setError(
+    "This bed is occupied and has no recorded occupancy end date. Record the end date before assigning a new resident."
+  );
+  return;
+}
+
+if (
+  selectedBed?.occupancyEndDate &&
+  startDate <= selectedBed.occupancyEndDate
+) {
+  setError(
+    `Start date must be after the current occupancy end date (${formatDate(selectedBed.occupancyEndDate)}).`
+  );
+  return;
+}
+
+if (startDate < new Date().toLocaleDateString("en-CA")) {
+  setError("The start date cannot be in the past.");
+  return;
+}
 
     // Demo only: no resident API is connected yet.
     // Do not save or send the Aadhaar number.
@@ -242,6 +342,7 @@ export function AddResidentForm() {
                   onChange={(event) => {
                     setRoomNumber(event.target.value);
                     setBedId("");
+                    setStartDate("");
                     setError("");
                     setDemoNotice(false);
                   }}
@@ -285,6 +386,7 @@ export function AddResidentForm() {
                   disabled={!selectedRoom || eligibleBeds.length === 0}
                   onChange={(event) => {
                     setBedId(event.target.value);
+                    setStartDate("");
                     setError("");
                     setDemoNotice(false);
                   }}
@@ -295,15 +397,79 @@ export function AddResidentForm() {
                   </option>
 
                   {eligibleBeds.map((bed) => (
-                    <option key={bed.id} value={bed.id}>
-                      Bed {bed.label}
-                    </option>
-                  ))}
+  <option key={bed.id} value={bed.id}>
+    Bed {bed.label} —{" "}
+    {bed.status === "available"
+      ? "Available"
+      : bed.status === "vacating"
+        ? "Vacating"
+        : "Occupied"}
+  </option>
+))}
                 </select>
                 <ChevronDown className="pointer-events-none absolute top-3 right-3 size-4 text-muted-foreground" />
               </div>
             </Field>
+            <Field
+  label="Start date"
+  hint="The date the resident's occupancy begins"
+>
+  <Input
+    required
+    type="date"
+    value={startDate}
+    min={
+      selectedBed?.occupancyEndDate
+        ? nextDate(selectedBed.occupancyEndDate)
+        : undefined
+    }
+    disabled={
+      Boolean(
+        selectedBed &&
+          selectedBed.status !== "available" &&
+          !selectedBed.occupancyEndDate
+      )
+    }
+    onChange={(event) => {
+      setStartDate(event.target.value);
+      setError("");
+      setDemoNotice(false);
+    }}
+    className="h-10 bg-input/30"
+  />
 
+  {selectedBed?.status === "available" && (
+    <p className="mt-1.5 text-xs text-success">
+      Bed is available. Select a valid occupancy start date.
+    </p>
+  )}
+
+  {selectedBed &&
+    selectedBed.status !== "available" &&
+    selectedBed.occupancyEndDate && (
+      <p className="mt-1.5 text-xs text-muted-foreground">
+        Current occupancy ends on{" "}
+        <span className="font-medium text-foreground">
+          {formatDate(selectedBed.occupancyEndDate)}
+        </span>
+        . The earliest permitted start date is{" "}
+        <span className="font-medium text-foreground">
+          {formatDate(nextDate(selectedBed.occupancyEndDate))}
+        </span>
+        .
+      </p>
+    )}
+
+  {selectedBed &&
+    selectedBed.status !== "available" &&
+    !selectedBed.occupancyEndDate && (
+      <p className="mt-1.5 flex items-start gap-1.5 text-xs text-warning">
+        <Info className="mt-0.5 size-3.5 shrink-0" />
+        This bed is occupied, but no occupancy end date is recorded.
+        Add the existing resident's end date before assigning a new start date.
+      </p>
+    )}
+</Field>
             {selectedRoom && bedId && (
               <div className="flex items-center gap-3 rounded-xl border border-info/20 bg-info/5 p-3">
                 <BedDouble className="size-5 text-info" />
@@ -395,6 +561,78 @@ export function AddResidentForm() {
                 className="h-10 bg-input/30"
               />
             </Field>
+            <div className="space-y-3 md:col-span-2">
+  <div>
+    <h3 className="text-sm font-medium">Resident photo</h3>
+    <p className="mt-1 text-xs text-muted-foreground">
+      Optional · Upload a passport-size photo or take one now.
+      JPG, PNG or WEBP · Maximum 5 MB.
+    </p>
+  </div>
+
+  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div className="grid size-28 shrink-0 place-items-center overflow-hidden rounded-2xl border border-border bg-muted/40">
+      {photoPreview ? (
+        <img
+          src={photoPreview}
+          alt="Resident photo preview"
+          className="size-full object-cover"
+        />
+      ) : (
+        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+          <ImagePlus className="size-7" />
+          <span className="text-xs">Photo preview</span>
+        </div>
+      )}
+    </div>
+
+    <div className="flex flex-wrap gap-2">
+      <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 text-sm transition hover:bg-muted">
+        <ImagePlus className="size-4" />
+        Upload photo
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handlePhotoChange}
+          className="sr-only"
+        />
+      </label>
+
+      <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 text-sm transition hover:bg-muted">
+        <Camera className="size-4" />
+        Take photo
+        <input
+          type="file"
+          accept="image/*"
+          capture="user"
+          onChange={handlePhotoChange}
+          className="sr-only"
+        />
+      </label>
+
+      {photoPreview && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setPhotoPreview("");
+            setPhotoError("");
+          }}
+          className="h-10 gap-2"
+        >
+          <X className="size-4" />
+          Remove
+        </Button>
+      )}
+    </div>
+  </div>
+
+  {photoError && (
+    <p role="alert" className="text-sm text-danger">
+      {photoError}
+    </p>
+  )}
+</div>
           </div>
 
           <div className="mt-4 flex gap-2 rounded-xl border border-warning/20 bg-warning/5 p-3 text-xs text-muted-foreground">
